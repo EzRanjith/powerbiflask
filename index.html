@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Power BI Embedded Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.19.0/dist/powerbi.min.js"></script>
+</head>
+<body>
+  <h2>Power BI Embedded Report</h2>
+  <div id="reportContainer" style="height:600px"></div>
+
+  <script>
+    fetch("http://localhost:5000/get-embed-config")
+      .then(response => response.json())
+      .then(config => {
+        console.log("Embed config:", config);
+
+        const models = window['powerbi-client'].models;
+
+        const embedConfig = {
+          type: 'report',
+          id: config.id,
+          embedUrl: config.embedUrl,
+          accessToken: config.accessToken,
+          tokenType: models.TokenType.Embed,
+          settings: {
+            panes: {
+              filters: { visible: false },
+              pageNavigation: { visible: true }
+            }
+          }
+        };
+
+        const reportContainer = document.getElementById('reportContainer');
+        powerbi.embed(reportContainer, embedConfig);
+      })
+      .catch(error => {
+        console.error("Error fetching embed config:", error);
+        const reportContainer = document.getElementById('reportContainer');
+        if (reportContainer) {
+          reportContainer.innerHTML = "<p>Failed to load report.</p>";
+        }
+      });
+  </script>
+</body>
+</html>
